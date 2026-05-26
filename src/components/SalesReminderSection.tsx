@@ -145,7 +145,7 @@ const SalesReminderSection = () => {
             </motion.a>
 
             <motion.a
-              href="/properties"
+              href="/properties/coworking"
               variants={buttonVariants}
               whileHover={{ 
                 y: -4, 

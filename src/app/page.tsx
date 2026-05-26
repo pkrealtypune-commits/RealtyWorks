@@ -29,7 +29,7 @@ export default function Home() {
       <AboutSection />
       <LocationCluster />
       <Testimonials />
-      <TrustBar />
+      {/* <TrustBar /> */}
       
       {/* Future components (e.g., Stats, Properties, About) 
         should be added here as the page grows.

@@ -1,164 +1,240 @@
 "use client";
 
-import Image from "next/image";
-import { motion, Variants, useSpring, useMotionValue } from "framer-motion";
+import React, { useRef, Suspense, useMemo } from "react";
+import { motion, Variants } from "framer-motion";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Points, PointMaterial, Sphere } from "@react-three/drei";
+import { ArrowUpRight } from "lucide-react";
+import * as random from "maath/random/dist/maath-random.esm";
+import * as THREE from "three";
 
-const Hero = () => {
-  // --- PREMIUM TEXT VARIANTS ---
-  const charVariants: Variants = {
-    hidden: { y: "120%", opacity: 0 },
+// --- 3D PARTICLE ORB COMPONENT ---
+function AnimatedOrb() {
+  const ref = useRef<THREE.Points | null>(null);
+  
+  const spherePoints = useMemo(() => {
+    return random.inSphere(new Float32Array(1500), { radius: 1.5 }) as Float32Array;
+  }, []);
+
+  useFrame((state) => {
+    if (!ref.current) return;
+    ref.current.rotation.x = state.clock.getElapsedTime() * 0.05;
+    ref.current.rotation.y = state.clock.getElapsedTime() * 0.07;
+  });
+
+  return (
+    <group rotation={[0, 0, Math.PI / 4]}>
+      <Points ref={ref} positions={spherePoints} stride={3} frustumCulled>
+        <PointMaterial
+          transparent
+          color="#6366f1"
+          size={0.025}
+          sizeAttenuation={true}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </Points>
+      <Sphere args={[0.8, 32, 32]}>
+        <meshStandardMaterial 
+          color="#0f172a" 
+          wireframe 
+          transparent 
+          opacity={0.08} 
+        />
+      </Sphere>
+    </group>
+  );
+}
+
+// --- MAIN HERO COMPONENT ---
+export default function PremiumHero() {
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
     visible: {
-      y: "0%",
       opacity: 1,
-      transition: { 
-        duration: 1, 
-        ease: [0.215, 0.61, 0.355, 1] 
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
       },
     },
   };
 
-  const subtextVariants: Variants = {
-    hidden: { opacity: 0, y: 15, filter: "blur(8px)" },
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 1.2, delay: 0.6, ease: "easeOut" },
+      transition: {
+        duration: 1.0,
+        ease: [0.16, 1, 0.3, 1],
+      },
     },
   };
 
-  const ctaVariants: Variants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { delay: 1, duration: 0.8 }
-    }
-  };
-
-  // --- MAGNETIC EFFECT ---
-  const mX = useMotionValue(0);
-  const mY = useMotionValue(0);
-  const springX = useSpring(mX, { stiffness: 100, damping: 20 });
-  const springY = useSpring(mY, { stiffness: 100, damping: 20 });
-
-  const handleMagnetic = (e: React.MouseEvent) => {
-    const { clientX, clientY, currentTarget } = e;
-    const { left, top, width, height } = currentTarget.getBoundingClientRect();
-    const x = (clientX - (left + width / 2)) * 0.25;
-    const y = (clientY - (top + height / 2)) * 0.25;
-    mX.set(x);
-    mY.set(y);
-  };
-
-  const splitText = (text: string) => {
-    return text.split("").map((char, index) => (
-      <span key={index} className="inline-block overflow-hidden pb-[0.05em] -mb-[0.05em]">
-        <motion.span variants={charVariants} className="inline-block will-change-transform">
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
-      </span>
-    ));
-  };
-
   return (
-    <section className="relative min-h-screen h-[100svh] w-full overflow-hidden bg-[#0a0a0a] flex items-center pt-20 md:pt-0">
+    /* ADJUSTED: Changed h-auto to min-h-screen on mobile and tweaked paddings to expand the container fully */
+    <section className="relative w-full min-h-screen lg:h-screen overflow-x-hidden bg-[#030712] flex flex-col lg:flex-row lg:items-center justify-center select-none pt-4 pb-5 lg:py-0">
       
-      {/* BACKGROUND LAYER */}
-      <div className="absolute inset-0 z-0">
-        <motion.div 
-          initial={{ scale: 1.2, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          viewport={{ once: false }}
-          transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full h-full"
+      {/* 1. CINEMATIC BACKGROUND VIDEO MATRIX */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover scale-105"
+          poster="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1920&q=80"
         >
-          <Image 
-            src="/images/hero1.avif" 
-            alt="Premium Office Space" 
-            fill 
-            priority 
-            className="object-cover brightness-[0.35] contrast-[1.1]" 
+          <source
+            src="https://player.vimeo.com/external/434045526.sd.mp4?s=c27ee37daaaaf9ab03247071efc609c250912cb9&profile_id=165&oauth2_token_id=57447761"
+            type="video/mp4"
           />
-        </motion.div>
-        <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/60 via-black/20 to-black md:bg-gradient-to-r md:from-black md:via-black/40 md:to-transparent" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/40 via-[#030712]/80 to-[#030712] lg:bg-gradient-to-r lg:from-[#030712] lg:via-[#030712]/80 lg:to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-[#030712]/30 z-10" />
+        <div className="absolute inset-0 bg-[#030712]/20 backdrop-blur-[1px] z-10" />
       </div>
 
-      <div className="container relative z-30 mx-auto px-6 md:px-12 xl:px-20">
-        <motion.div 
-          className="max-w-5xl"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: false, amount: 0.2 }}
-        >
+      {/* 2. DYNAMIC AMBIENT LIGHT BLOBS */}
+      <div className="absolute top-1/4 left-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-indigo-600/10 rounded-full blur-[100px] md:blur-[140px] pointer-events-none animate-pulse duration-[8000ms] z-10" />
+      <div className="absolute bottom-1/4 right-1/4 w-[350px] md:w-[600px] h-[350px] md:h-[600px] bg-emerald-600/5 rounded-full blur-[110px] md:blur-[160px] pointer-events-none animate-pulse duration-[12000ms] z-10" />
+
+      {/* 3. CORE INTERACTIVE INTERFACE GRID */}
+      {/* ADJUSTED: Changed h-full to flex flex-col on mobile to leverage the screen vertical height dynamically */}
+      <div className="max-w-7xl w-full mx-auto px-6 md:px-12 flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-12 items-center relative z-20 min-h-screen lg:h-full pt-16 sm:pt-24 lg:pt-16">
+        
+        {/* MOBILE OVERLAY VIEWPORT AREA (16:9 Aspect Screen Layout) */}
+        <div className="order-1 lg:order-2 lg:col-span-5 w-full aspect-[16/9] lg:aspect-auto lg:h-[65vh] relative flex items-center justify-between rounded-2xl overflow-hidden bg-transparent border-none flex-shrink-0">
           
+          {/* Three.js Canvas Layer */}
+          <div className="absolute lg:inset-0 right-0 w-1/2 lg:w-full h-full z-0 pointer-events-none">
+            <motion.div 
+              className="w-full h-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
+            >
+              <div className="w-full h-full block lg:hidden">
+                <Canvas camera={{ position: [0, 0, 3], fov: 75 }}>
+                  <ambientLight intensity={0.5} />
+                  <pointLight position={[10, 10, 10]} intensity={1.5} color="#6366f1" />
+                  <Suspense fallback={null}>
+                    <AnimatedOrb />
+                  </Suspense>
+                </Canvas>
+              </div>
+
+              <div className="w-full h-full hidden lg:block">
+                <Canvas camera={{ position: [0, 0, 3], fov: 60 }}>
+                  <ambientLight intensity={0.5} />
+                  <pointLight position={[10, 10, 10]} intensity={1.5} color="#6366f1" />
+                  <Suspense fallback={null}>
+                    <AnimatedOrb />
+                  </Suspense>
+                </Canvas>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Mobile Text Heading Layer */}
+          <div className="absolute inset-y-0 left-0 w-[65%] z-10 flex flex-col justify-center pl-6 bg-gradient-to-r from-[#030712] via-[#030712]/40 to-transparent lg:hidden text-left">
+            <div className="inline-flex items-center gap-2 mb-2 w-fit">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+              <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-400 font-medium">Premium Space</span>
+            </div>
+            
+            <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight leading-[1.1]">
+              Find Your Perfect <br />
+              Office Space & <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
+                Co-Working Hubs.
+              </span>
+            </h1>
+          </div>
+          
+        </div>
+
+        {/* BOTTOM CONTENT AREA: DESCRIPTION & CTAs ON MOBILE */}
+        {/* ADJUSTED: flex-grow expands this box down, and mt-10 / md:mt-12 spaces it beautifully away from the 16:9 view */}
+        <motion.div 
+          className="order-2 lg:order-1 lg:col-span-7 flex flex-col justify-start text-left mt-10 md:mt-12 lg:mt-0 flex-grow"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Desktop Only Tagline */}
+          <motion.div variants={itemVariants} className="hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md w-fit mb-4 shadow-2xl">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
+            <span className="text-xs uppercase tracking-[0.25em] text-zinc-400 font-medium">Premium Office Space • Pune, India</span>
+          </motion.div>
+
+          {/* Desktop Only Heading */}
           <motion.h1 
-            transition={{ staggerChildren: 0.015, delayChildren: 0.2 }}
-            className="text-[2.75rem] leading-[1.1] md:text-8xl lg:text-[100px] font-bold tracking-tighter md:tracking-tight mb-6 md:mb-8 text-white md:leading-[0.85]"
+            variants={itemVariants}
+            className="hidden lg:block text-4xl sm:text-6xl xl:text-7xl font-bold text-white tracking-tight leading-[1.05] mb-6"
           >
-            <div className="block overflow-hidden h-fit">
-              {splitText("Find Your Perfect")}
-            </div>
-            <div className="block overflow-hidden h-fit">
-              {splitText("Office Space &")}
-            </div>
-            <div className="block overflow-hidden h-fit text-accent-orange">
-              {splitText("Co-Working Hubs.")}
-            </div>
+            Find Your Perfect <br />
+            Office Space & <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400">
+              Co-Working Hubs.
+            </span>
           </motion.h1>
 
+          {/* Subtext Paragraph */}
+          {/* ADJUSTED: mb-8 provides breathing space right before the buttons container */}
           <motion.p 
-            variants={subtextVariants}
-            className="max-w-xl text-base md:text-xl text-white/50 mb-8 md:mb-12 leading-relaxed text-balance"
+            variants={itemVariants}
+            className="text-sm sm:text-base lg:text-lg text-zinc-400 max-w-xl font-light leading-relaxed mb-8 lg:mb-10"
           >
-            Secure high-performance logistics-grade assets and agile workspaces designed for scalability. 
-            <span className="block mt-4 text-[9px] md:text-[10px] uppercase tracking-[0.3em] md:tracking-[0.4em] font-black text-white/20">
-              Premium Office Space • Pune, India
-            </span>
+            Secure high-performance logistics-grade assets and agile workspaces designed for scalability and engineered for generational distinction.
           </motion.p>
 
-          <motion.div 
-            variants={ctaVariants}
-            className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start sm:items-center"
-          >
-            <motion.a 
-              href="/properties" 
-              onMouseMove={handleMagnetic}
-              onMouseLeave={() => { mX.set(0); mY.set(0); }}
-              style={{ x: springX, y: springY }}
-              className="w-full sm:w-auto bg-accent-orange text-white font-bold text-xs md:text-sm uppercase tracking-widest px-10 py-5 md:px-12 md:py-6 rounded-full shadow-2xl flex justify-center items-center group relative overflow-hidden"
+          {/* Mobile & Desktop Action Trigger Systems */}
+          {/* ADJUSTED: Added mb-6 on mobile to guarantee items don't hit or overlap your custom bottom app navigation menu */}
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-6 lg:mb-0">
+            <a 
+              href="/properties/managed-offices" 
+              className="group relative px-6 py-4 lg:px-8 bg-white text-black font-semibold text-sm rounded-xl lg:rounded-sm overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 hover:bg-zinc-100 shadow-[0_0_30px_rgba(255,255,255,0.1)]"
             >
-              <span className="relative z-10 flex items-center">
-                Discover Properties
-                <svg width="18" height="18" viewBox="0 0 15 15" fill="none" className="ml-3 md:ml-4 transition-transform group-hover:translate-x-2">
-                    <path d="M1 7.5H14M14 7.5L8 1.5M14 7.5L8 13.5" stroke="currentColor" strokeWidth="2" />
-                </svg>
-              </span>
-              <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-            </motion.a>
+              Discover Properties
+              <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
             
-            <a href="/contact" className="w-full sm:w-auto text-center text-white/40 hover:text-white font-bold text-xs md:text-sm uppercase tracking-[0.2em] md:tracking-[0.3em] transition-all flex items-center justify-center group">
-              Enquire <span className="ml-3 group-hover:translate-x-2 transition-transform">→</span>
+            <a 
+              href="/contact" 
+              className="px-6 py-4 lg:px-8 bg-white/5 text-white font-medium text-sm rounded-xl lg:rounded-sm border border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/10 hover:border-white/20 text-center"
+            >
+              Enquire Now
             </a>
           </motion.div>
         </motion.div>
+        
       </div>
 
-      {/* Subtle Background Detail - Hidden on smallest screens */}
-      <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-30 hidden sm:block">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: false }}
-          transition={{ delay: 1.5 }}
-          className="flex gap-4 items-center"
-        >
-          <div className="w-8 md:w-12 h-[1px] bg-white/20" />
-          <span className="text-[9px] md:text-[10px] text-white/20 uppercase tracking-[0.5em]">Global Standards</span>
-        </motion.div>
-      </div>
+      {/* 4. PREMIUM SCROLL INDICATOR */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 hidden lg:flex flex-col items-center gap-2 cursor-pointer"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 1 }}
+      >
+        <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold">Scroll Down</span>
+        <div className="w-[20px] h-[36px] rounded-full border-2 border-zinc-700 p-1 flex justify-center">
+          <motion.div 
+            className="w-1 h-2 bg-indigo-500 rounded-full"
+            animate={{ 
+              y: [0, 12, 0],
+              opacity: [1, 0.2, 1]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        </div>
+      </motion.div>
+
     </section>
   );
-};
-
-export default Hero;
+}

@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { 
-  Building, 
+  Home, 
   TrendingUp, 
-  Landmark, 
+  Building2, 
   ShieldCheck, 
   ChevronRight, 
   MapPin, 
@@ -14,29 +14,25 @@ import {
 } from "lucide-react";
 import { allProperties } from "@/data/allproperties";
 
-const CommercialProperties = () => {
-  // Fixes the filter logic to properly check the data block's category field
-  const commercialProperties = allProperties.filter(
-    (item) => item.category?.toLowerCase() === "commercial"
+const ResidentialProperties = () => {
+  // Filters properties specifically for the Residential category
+  const residentialProperties = allProperties.filter(
+    (item) => item.category?.toLowerCase() === "residential"
   );
 
-  // Dynamically extract unique locations from the commercial property listings
+  // Extracts unique locations for the filter section
   const locations = Array.from(
-    new Set(commercialProperties.map((prop) => prop.location).filter(Boolean))
+    new Set(residentialProperties.map((prop) => prop.location).filter(Boolean))
   );
 
-  // Map icons dynamically based on structural categories or structural types
+  // Icon mapping for different types of residential units
   const getCategoryIcon = (type: string) => {
     switch (type?.toLowerCase()) {
-      case "showroom":
-      case "showroom & shops":
-        return <Landmark className="w-6 h-6" />;
-      case "office":
-      case "office & shops":
-      case "office & shop":
-        return <Building className="w-6 h-6" />;
+      case "villa":
+        return <Home className="w-6 h-6" />;
+      case "residential":
       default:
-        return <TrendingUp className="w-6 h-6" />;
+        return <Building2 className="w-6 h-6" />;
     }
   };
 
@@ -51,19 +47,18 @@ const CommercialProperties = () => {
             className="max-w-4xl"
           >
             <span className="text-accent-orange font-bold uppercase tracking-[0.3em] text-[10px] mb-4 block">
-              Commercial Real Estate Portfolio
+              Residential Portfolio
             </span>
             <h1 className="text-4xl md:text-7xl font-bold tracking-tightest mb-6 uppercase">
-              Premium <span className="text-accent-orange">Assets</span>. <br />
-              Strategic Growth.
+              Elite <span className="text-accent-orange">Living</span>. <br />
+              Timeless Spaces.
             </h1>
             <p className="text-foreground-secondary text-lg leading-relaxed mb-8 max-w-2xl">
-              RealtyWorks connects businesses and investors with Pune's most coveted commercial addresses. 
-              Specializing in Grade-A office acquisitions and high-yield retail spaces.
+              Discover curated luxury residences across Pune's most desirable neighborhoods. 
+              From high-rise riverfront apartments to exclusive villas, find your next home with RealtyWorks.
             </p>
           </motion.div>
         </div>
-        {/* Abstract Background Grid */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
       </section>
 
@@ -71,13 +66,12 @@ const CommercialProperties = () => {
       <section className="py-24">
         <div className="container mx-auto px-6 md:px-12 xl:px-20">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {commercialProperties.map((item, i) => (
+            {residentialProperties.map((item, i) => (
               <motion.div 
                 key={item.id || i}
                 whileHover={{ y: -10 }}
                 className="rounded-3xl bg-background-secondary border border-white/5 hover:border-accent-orange/50 transition-all group overflow-hidden flex flex-col h-full"
               >
-                {/* Premium Stock Image Element integration */}
                 <div className="relative w-full h-48 bg-neutral-900 overflow-hidden">
                   <Image 
                     src={item.image} 
@@ -122,15 +116,15 @@ const CommercialProperties = () => {
         </div>
       </section>
 
-      {/* Focus Locations */}
+      {/* Primary Corridors */}
       <section className="py-24 bg-background-secondary/20">
         <div className="container mx-auto px-6 md:px-12 xl:px-20">
           <div className="flex flex-col lg:flex-row justify-between items-end gap-12">
             <div className="max-w-xl">
-              <h2 className="text-3xl font-bold mb-6 uppercase tracking-tighter">Primary Investment Corridors</h2>
+              <h2 className="text-3xl font-bold mb-6 uppercase tracking-tighter">Prime Residential Hubs</h2>
               <p className="text-foreground-secondary text-sm leading-relaxed mb-8">
-                We monitor high-growth zones in East Pune to provide our clients with first-mover advantages 
-                in upcoming commercial developments.
+                We represent properties in neighborhoods that define Pune's modern lifestyle, 
+                balancing serene environments with premium urban connectivity.
               </p>
               <div className="flex flex-wrap gap-3">
                 {locations.map((loc, i) => (
@@ -147,8 +141,8 @@ const CommercialProperties = () => {
                 className="group flex items-center gap-6 p-8 rounded-3xl bg-accent-orange text-white hover:brightness-110 transition-all shadow-[0_30px_60px_rgba(255,107,0,0.2)]"
               >
                 <div className="text-left">
-                  <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Inquiry for Q2 2026</p>
-                  <p className="text-xl font-bold uppercase">Get Investment Portfolio</p>
+                  <p className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">Exclusive Access</p>
+                  <p className="text-xl font-bold uppercase">Schedule a Viewing</p>
                 </div>
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:translate-x-2 transition-transform">
                   <ChevronRight className="w-6 h-6" />
@@ -158,50 +152,8 @@ const CommercialProperties = () => {
           </div>
         </div>
       </section>
-
-      {/* Featured Insight Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-6 md:px-12 xl:px-20">
-          <div className="relative rounded-[40px] overflow-hidden bg-background-secondary border border-white/5 p-12 lg:p-20">
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-3xl lg:text-5xl font-bold mb-8 uppercase leading-[1.1]">
-                  Why Commercial <br /> 
-                  <span className="text-accent-orange">Acquisition</span>?
-                </h2>
-                <ul className="space-y-6">
-                  <li className="flex items-start gap-4">
-                    <ShieldCheck className="w-6 h-6 text-accent-orange flex-shrink-0" />
-                    <div>
-                      <p className="font-bold text-lg">MahaRERA Compliant</p>
-                      <p className="text-sm text-foreground-secondary italic">Full due diligence on every project we represent.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <MapPin className="w-6 h-6 text-accent-orange flex-shrink-0" />
-                    <div>
-                      <p className="font-bold text-lg">Micro-Market Expertise</p>
-                      <p className="text-sm text-foreground-secondary italic">Deep data on Kalyani Nagar and Kharadi rental yields.</p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <div className="relative aspect-video rounded-2xl overflow-hidden opacity-40 grayscale group hover:grayscale-0 hover:opacity-100 transition-all duration-700">
-                 <Image 
-                  src="/logo.avif" 
-                  alt="Pune Commercial Real Estate" 
-                  fill 
-                  className="object-contain p-12"
-                />
-              </div>
-            </div>
-            {/* Ambient Background Glow */}
-            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-accent-orange/10 blur-[100px] rounded-full" />
-          </div>
-        </div>
-      </section>
     </main>
   );
 };
 
-export default CommercialProperties;
+export default ResidentialProperties;

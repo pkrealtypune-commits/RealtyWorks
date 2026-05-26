@@ -1,0 +1,11 @@
+declare module "maath/random/dist/maath-random.esm" {
+  export function inSphere(
+    array: Float32Array,
+    options?: { radius?: number }
+  ): Float32Array;
+  
+  export function inBox(
+    array: Float32Array,
+    options?: { sides?: number[] | number }
+  ): Float32Array;
+}

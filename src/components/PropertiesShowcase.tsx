@@ -1,191 +1,225 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { properties } from "@/data/properties";
 
-const PropertiesShowcase = () => {
+export default function PropertiesShowcase() {
   const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const nextStep = () => {
-    setDirection(1);
-    setIndex((prev) => (prev === properties.length - 1 ? 0 : prev + 1));
-  };
-
-  const prevStep = () => {
-    setDirection(-1);
-    setIndex((prev) => (prev === 0 ? properties.length - 1 : prev - 1));
-  };
-
-  const sliderVariants: Variants = {
-    initial: (direction: number) => ({
-      opacity: 0,
-      scale: 0.95,
-      x: direction > 0 ? "20%" : "-20%",
-      rotateY: direction > 0 ? 30 : -30,
-      z: -200,
-    }),
-    animate: {
-      opacity: 1,
-      scale: 1,
-      x: 0,
-      rotateY: 0,
-      z: 0,
-      transition: {
-        duration: 1.2,
-        ease: [0.16, 1, 0.3, 1],
-        staggerChildren: 0.1,
-      },
-    },
-    exit: (direction: number) => ({
-      opacity: 0,
-      scale: 1.05,
-      x: direction > 0 ? "-10%" : "10%",
-      rotateY: direction > 0 ? -15 : 15,
-      z: 100,
-      transition: {
-        duration: 0.8,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    }),
-  };
+  // Auto-playing sequence to loop through our active array panel index smoothly
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev === properties.length - 1 ? 0 : prev + 1));
+    }, 4500); // Rotates dynamic variables every 4.5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-background-primary select-none flex items-center perspective-[2000px]">
-      <AnimatePresence initial={false} custom={direction} mode="popLayout">
-        <motion.div
-          key={index}
-          custom={direction}
-          variants={sliderVariants}
-          // --- VIEWPORT RE-TRIGGER LOGIC ---
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: false, amount: 0.3 }}
-          exit="exit"
-          className="absolute inset-0 w-full h-full preserve-3d"
-        >
-          {/* Background Ken Burns Effect */}
-          <motion.div 
-            className="absolute inset-0 w-full h-full"
-            animate={{ scale: [1, 1.08, 1] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          >
-            <Image
-              src={properties[index].image}
-              alt={properties[index].title}
-              fill
-              priority
-              className="object-cover brightness-[0.75] contrast-[1.1] saturate-[1.1]"
-            />
-          </motion.div>
+    <section 
+      ref={containerRef}
+      className="relative w-full min-h-screen flex items-center justify-center py-16 md:py-24 overflow-hidden select-none bg-[#0a0a0c] text-white"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      {/* High-end ambient backdrop glow elements instead of simple radial filters */}
+      <div className="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[130px] pointer-events-none mix-blend-screen" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[450px] h-[450px] bg-zinc-500/5 rounded-full blur-[110px] pointer-events-none mix-blend-screen" />
 
-          <div className="absolute inset-0 bg-gradient-to-r from-background-primary/80 via-background-primary/20 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,34,68,0.4)_100%)] pointer-events-none" />
+      {/* Main Structural Asymmetric Typography & Media Grid */}
+      <div className="w-full max-w-[1340px] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 flex flex-col justify-center space-y-10 md:space-y-6">
+        
+        {/* ================= ROW 1: HEADER HOOK & HERO PANEL 1 ================= */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 lg:gap-8 w-full">
+          
+          {/* Main Context Headline Area */}
+          <div className="flex flex-col items-start space-y-2 max-w-xl">
+            <span className="text-[11px] font-extrabold tracking-[0.4em] uppercase text-zinc-500 block pl-1">
+              {properties[index].status || "Featured Collection"}
+            </span>
+            
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter leading-none uppercase">
+              <span className="block text-zinc-400 font-light tracking-tight normal-case text-2xl sm:text-3xl md:text-4xl mb-1">
+                Discover Premium
+              </span>
+              <div className="overflow-hidden h-[1.15em] relative min-w-[300px] sm:min-w-[450px]">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={`title-${index}`}
+                    initial={{ y: "90%", opacity: 0 }}
+                    animate={{ y: "0%", opacity: 1 }}
+                    exit={{ y: "-90%", opacity: 0 }}
+                    transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute left-0 top-0 block bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent"
+                  >
+                    {properties[index].title.split(" ")[0] || "Asset"}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+            </h1>
+          </div>
 
-          {/* Main Content */}
-          <div className="relative z-10 w-full h-full flex flex-col justify-center px-10 md:px-24 lg:px-32">
-            <div className="max-w-6xl w-full mx-auto">
-              
-              {/* Badge */}
+          {/* Primary Media Block — Replacing the boring fullscreen background */}
+          <div className="relative flex-1 w-full h-[220px] sm:h-[280px] md:h-[320px] rounded-3xl overflow-hidden border border-zinc-800/60 shadow-2xl bg-[#121215]">
+            <AnimatePresence mode="wait">
               <motion.div
-                variants={{
-                  initial: { opacity: 0, y: 20 },
-                  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-                }}
+                key={`img1-${index}`}
+                initial={{ opacity: 0, scale: 1.08 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 w-full h-full"
               >
-                <span className="inline-block mb-8 px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.4em] uppercase border border-white/20 bg-background-primary/40 text-accent-orange backdrop-blur-xl shadow-xl">
-                  {properties[index].status}
-                </span>
+                <Image
+                  src={properties[index].image}
+                  alt={properties[index].title}
+                  fill
+                  priority
+                  className="object-cover brightness-[0.65] contrast-[1.02] transition-transform duration-700 hover:scale-105"
+                />
               </motion.div>
-
-              {/* Title */}
-              <motion.h2
-                variants={{
-                  initial: { opacity: 0, x: -30 },
-                  animate: { opacity: 1, x: 0, transition: { duration: 0.8 } }
-                }}
-                className="text-6xl md:text-8xl lg:text-9xl font-bold text-white tracking-tightest mb-8 leading-[0.85] drop-shadow-2xl"
-              >
-                {properties[index].title}
-              </motion.h2>
-
-              {/* Info Row */}
-              <motion.div
-                variants={{
-                  initial: { opacity: 0, y: 30 },
-                  animate: { opacity: 1, y: 0, transition: { duration: 0.8 } }
-                }}
-                className="flex flex-col md:flex-row md:items-end gap-10 mb-16"
-              >
-                <div className="flex flex-col gap-2">
-                  <span className="text-accent-orange text-[10px] font-bold uppercase tracking-[0.5em] opacity-90">Location</span>
-                  <p className="text-white text-2xl md:text-4xl font-light uppercase tracking-widest border-l-2 border-accent-orange/60 pl-6 text-balance">
-                    {properties[index].location}
-                  </p>
-                </div>
-                <div className="hidden md:block h-12 w-[1px] bg-white/20 mx-4" />
-                <div className="flex flex-col gap-2">
-                   <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.5em]">Inventory</span>
-                   <p className="text-white/80 text-lg md:text-xl tracking-widest uppercase">
-                     {properties[index].size}
-                   </p>
-                </div>
-              </motion.div>
-
-              {/* CTAs */}
-              <motion.div 
-                className="flex flex-wrap gap-6"
-                variants={{
-                  initial: { opacity: 0, y: 20 },
-                  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-                }}
-              >
-                <button className="group relative bg-accent-orange text-white px-12 py-5 rounded-full font-bold text-[12px] uppercase tracking-[0.2em] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,107,0,0.3)] active:scale-95">
-                  <span className="relative z-10">Enquire Now</span>
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                </button>
-                <button className="border border-white/20 bg-white/5 backdrop-blur-xl px-12 py-5 rounded-full font-bold text-[12px] uppercase tracking-[0.2em] text-white hover:bg-white/10 transition-all">
-                  Full Details
-                </button>
-              </motion.div>
+            </AnimatePresence>
+            
+            {/* Dynamic Absolute Local Meta Pill over main window */}
+            <div className="absolute bottom-4 left-5 z-20 bg-black/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5 shadow-xl flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase">
+                LOC: {properties[index].location}
+              </span>
             </div>
           </div>
-        </motion.div>
-      </AnimatePresence>
+        </div>
 
-      {/* Navigation Controls */}
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-[100] px-6 md:px-10 flex justify-between pointer-events-none">
-        <button 
-          onClick={prevStep}
-          className="pointer-events-auto w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full border border-white/10 bg-background-primary/30 backdrop-blur-xl text-white/60 hover:text-accent-orange hover:border-accent-orange/40 transition-all group"
-        >
-          <svg className="w-6 h-6 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+        {/* ================= ROW 2: INTERLOCKING SPECIFICATION PILL & ALTERNATIVE MEDIA ================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch w-full">
+          
+          {/* Detailed Variable Configuration Box */}
+          <div className="lg:col-span-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-[#111114]/60 border border-zinc-800/50 p-6 sm:p-8 rounded-[32px] backdrop-blur-md relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.01] rounded-full translate-x-10 -translate-y-10 group-hover:scale-110 transition-transform duration-700" />
+            
+            <div className="flex flex-col justify-center">
+              <h2 className="text-5xl sm:text-6xl font-black tracking-tighter text-zinc-800 uppercase selection:bg-transparent">
+                SPEC
+              </h2>
+            </div>
 
-        <button 
-          onClick={nextStep}
-          className="pointer-events-auto w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full border border-white/10 bg-background-primary/30 backdrop-blur-xl text-white/60 hover:text-accent-orange hover:border-accent-orange/40 transition-all group"
-        >
-          <svg className="w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+            <div className="flex-1 space-y-4 w-full border-t sm:border-t-0 sm:border-l border-zinc-800/80 pt-4 sm:pt-0 sm:pl-8">
+              <div className="text-sm sm:text-base text-zinc-400 font-light leading-relaxed max-w-md">
+                Experience unparalleled refinement. A meticulously curated portfolio built exclusively for elite asset requirements.
+              </div>
+              
+              <div className="flex flex-wrap gap-6 pt-1">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Full Identity</span>
+                  <div className="h-6 overflow-hidden relative min-w-[150px]">
+                    <AnimatePresence mode="wait">
+                      <motion.span 
+                        key={`text-title-${index}`}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -12 }}
+                        className="absolute text-white font-medium text-sm sm:text-base whitespace-nowrap"
+                      >
+                        {properties[index].title}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                </div>
 
-      {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/5 z-50 overflow-hidden">
-        <motion.div 
-          className="h-full bg-accent-orange origin-left"
-          animate={{ scaleX: (index + 1) / properties.length }}
-          transition={{ duration: 1, ease: "circOut" }}
-        />
+                {properties[index].size && (
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Inventory Config</span>
+                    <div className="h-6 overflow-hidden relative min-w-[120px]">
+                      <AnimatePresence mode="wait">
+                        <motion.span 
+                          key={`text-size-${index}`}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -12 }}
+                          className="absolute text-zinc-300 font-light text-sm sm:text-base"
+                        >
+                          {properties[index].size}
+                        </motion.span>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Far Right Typographic Block with Mini-Aspect Container */}
+          <div className="lg:col-span-4 flex flex-row lg:flex-col gap-4 w-full">
+            <div className="relative flex-1 h-[120px] lg:h-auto rounded-2xl overflow-hidden border border-zinc-800/80 bg-[#121215]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`img2-${index}`}
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.9 }}
+                  className="absolute inset-0 w-full h-full"
+                >
+                  <Image
+                    src={properties[index].image}
+                    alt="Secondary thumbnail viewport"
+                    fill
+                    className="object-cover brightness-[0.35] grayscale contrast-[1.1]"
+                  />
+                </motion.div>
+              </AnimatePresence>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-transparent" />
+            </div>
+
+            <div className="flex flex-col justify-end p-2 min-w-[140px]">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase leading-none text-zinc-200">
+                Architectural <span className="text-amber-500 block lg:mt-1">Pinnacle</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        {/* ================= BOTTOM ACTION CTA BAR & PROGRESS DOT TIMELINE ================= */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-6 w-full border-t border-zinc-800/50 relative">
+          
+          {/* Clean Pagination Timeline instead of standard full width line */}
+          <div className="flex gap-2.5 ordered-trig-container">
+            {properties.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIndex(i)}
+                className="h-1.5 rounded-full transition-all duration-500 relative bg-zinc-800 overflow-hidden"
+                style={{ width: i === index ? "36px" : "8px" }}
+                aria-label={`Navigate to panel slider ${i + 1}`}
+              >
+                {i === index && (
+                  <motion.div 
+                    className="absolute inset-0 left-0 top-0 h-full bg-amber-500 origin-left"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 4.5, ease: "linear" }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Interactive Button CTA Actions Group */}
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-end">
+          <Link 
+            href="/contact" 
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center bg-white text-black px-6 md:px-8 py-3.5 rounded-full font-bold text-[11px] uppercase tracking-widest transition-all duration-300 hover:bg-zinc-200 transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl"
+          >
+            Enquire Now
+          </Link>
+            
+          </div>
+
+        </div>
+
       </div>
     </section>
   );
-};
-
-export default PropertiesShowcase;
+}

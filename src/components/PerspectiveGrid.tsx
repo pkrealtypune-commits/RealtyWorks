@@ -2,54 +2,83 @@
 
 import React, { useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Layout, Shield, Zap, Globe } from "lucide-react";
+import { Layout, Shield, Zap, Globe, ArrowUpRight } from "lucide-react";
 
 const services = [
   {
-    title: "Managed Offices",
-    desc: "Fully serviced premium workspaces designed for high-growth teams in Pune.",
-    icon: <Layout className="w-6 h-6" />,
+    title: "Managed Office Solutions",
+    desc: "Fully tailor-made premium workspaces managed completely to support enterprise operational scale.",
+    icon: <Layout className="w-5 h-5" />,
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80",
+    gridClass: "md:col-span-2 lg:col-span-2 row-span-1",
   },
   {
-    title: "Industrial Warehousing",
-    desc: "Strategic logistics hubs in Chakan and Talegaon with RERA compliance.",
-    icon: <Shield className="w-6 h-6" />,
+    title: "Co-working",
+    desc: "Flexible, high-energy work environments tailored for scaling teams and independent innovators.",
+    icon: <Zap className="w-5 h-5" />,
+    image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=600&q=80",
+    gridClass: "md:col-span-1 lg:col-span-1 row-span-1",
   },
   {
-    title: "Local SEO Strategy",
-    desc: "Dominating local search and Google Ads for real estate and service centers.",
-    icon: <Zap className="w-6 h-6" />,
+    title: "Co-working Spaces",
+    desc: "Premium community-driven hubs equipped with top-tier shared infrastructure and amenities.",
+    icon: <Globe className="w-5 h-5" />,
+    image: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=600&q=80",
+    gridClass: "md:col-span-1 lg:col-span-1 row-span-1",
   },
   {
-    title: "ERP Systems",
-    desc: "Custom high-conversion landing pages and back-office management software.",
-    icon: <Globe className="w-6 h-6" />,
+    title: "Commercial",
+    desc: "Strategic retail and elite commercial setups positioned within high-growth corridors.",
+    icon: <Shield className="w-5 h-5" />,
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
+    gridClass: "md:col-span-2 lg:col-span-2 row-span-1",
+  },
+  {
+    title: "Premium Office Spaces",
+    desc: "Iconic corporate layouts designed with superior architecture for institutional brands.",
+    icon: <Layout className="w-5 h-5" />,
+    image: "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&w=600&q=80",
+    gridClass: "md:col-span-2 lg:col-span-2 row-span-1",
+  },
+  {
+    title: "Industrial",
+    desc: "Heavy-duty manufacturing environments and operational spaces built for high performance.",
+    icon: <Shield className="w-5 h-5" />,
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=600&q=80",
+    gridClass: "md:col-span-1 lg:col-span-1 row-span-1",
+  },
+  {
+    title: "Industrial Sheds & Land",
+    desc: "Compliant industrial zones, expansive storage sheds, and land layouts across strategic logistics hubs.",
+    icon: <Zap className="w-5 h-5" />,
+    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80",
+    gridClass: "md:col-span-3 lg:col-span-3 row-span-1",
   },
 ];
 
-const ServiceCard = ({ service, idx }: { service: typeof services[0], idx: number }) => {
+const ServiceCard = ({ service, idx }: { service: typeof services[0]; idx: number }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
 
-  const mouseXSpring = useSpring(x);
-  const mouseYSpring = useSpring(y);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["15deg", "-15deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
+  const springConfig = { damping: 25, stiffness: 250 };
+  const dx = useSpring(mouseX, springConfig);
+  const dy = useSpring(mouseY, springConfig);
+
+  const rotateX = useTransform(dy, [-0.5, 0.5], [5, -5]);
+  const rotateY = useTransform(dx, [-0.5, 0.5], [-5, 5]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left) / rect.width - 0.5;
-    const mouseY = (e.clientY - rect.top) / rect.height - 0.5;
-    x.set(mouseX);
-    y.set(mouseY);
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
   const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
+    mouseX.set(0);
+    mouseY.set(0);
   };
 
   return (
@@ -62,95 +91,92 @@ const ServiceCard = ({ service, idx }: { service: typeof services[0], idx: numbe
         rotateY,
         transformStyle: "preserve-3d",
       }}
-      whileHover={{ 
-        z: 50,
-        scale: 1.05,
-        borderColor: "rgba(255, 107, 0, 0.3)"
-      }}
-      className="flex-shrink-0 w-[300px] md:w-[350px] relative group bg-background-secondary border border-white/10 p-8 rounded-[2rem] transition-colors duration-300 cursor-pointer shadow-2xl"
+      className={`relative group overflow-hidden rounded-[24px] bg-neutral-900 border border-neutral-800 p-8 flex flex-col justify-between min-h-[300px] transition-all duration-500 ${service.gridClass}`}
     >
+      {/* Background Asset Image */}
       <div 
-        style={{ transform: "translateZ(40px)" }}
-        className="w-14 h-14 bg-accent-orange/10 border border-accent-orange/20 rounded-2xl flex items-center justify-center text-accent-orange mb-6 group-hover:bg-accent-orange group-hover:text-white transition-all duration-500"
-      >
-        {service.icon}
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-103 pointer-events-none" 
+        style={{ backgroundImage: `url(${service.image})` }}
+      />
+      
+      {/* Dark Readability Scrim Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/70 to-neutral-950/40 group-hover:via-neutral-950/60 group-hover:from-neutral-950/90 transition-all duration-500 pointer-events-none" />
+
+      {/* Interactive Flash Follow Radial Glow */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(400px circle at calc(${dx.get() + 0.5} * 100%) calc(${dy.get() + 0.5} * 100%), rgba(249, 115, 22, 0.12), transparent 60%)`
+        }}
+      />
+
+      {/* Card Header Structure */}
+      <div className="relative z-10 flex items-start justify-between" style={{ transform: "translateZ(25px)" }}>
+        <div className="w-11 h-11 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-center justify-center text-neutral-300 group-hover:text-orange-500 group-hover:border-orange-500/30 transition-all duration-300">
+          {service.icon}
+        </div>
+        <span className="text-xs font-mono tracking-widest text-neutral-500">
+          // 0{idx + 1}
+        </span>
       </div>
 
-      <div style={{ transform: "translateZ(30px)" }}>
-        <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+      {/* Typography and Interactive Movement */}
+      <div className="relative z-10 mt-16" style={{ transform: "translateZ(35px)" }}>
+        <h3 className="text-2xl font-medium text-white tracking-tight flex items-center gap-2 mb-2 transition-transform duration-300 group-hover:translate-x-1">
           {service.title}
+          <ArrowUpRight className="w-4 h-4 opacity-0 -translate-x-2 translate-y-2 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-300 text-orange-500" />
         </h3>
-        <p className="text-sm text-foreground-secondary leading-relaxed font-light">
+
+        {/* Text Hover Animation: Slides slightly up and shifts color depth */}
+        <p className="text-sm text-neutral-300/80 leading-relaxed font-light max-w-2xl transition-all duration-500 transform translate-y-1.5 group-hover:translate-y-0 group-hover:text-neutral-100">
           {service.desc}
         </p>
       </div>
 
-      <div 
-        style={{ transform: "translateZ(20px)" }}
-        className="absolute bottom-4 right-6 text-white/5 font-black text-6xl select-none group-hover:text-accent-orange/10 transition-colors"
-      >
-        0{idx + 1}
-      </div>
+      {/* Dynamic Border Framework */}
+      <div className="absolute inset-0 border border-transparent group-hover:border-neutral-700/20 rounded-[24px] pointer-events-none transition-all duration-500" />
     </motion.div>
   );
 };
 
-const PerspectiveGrid = () => {
-  const [isPaused, setIsPaused] = useState(false);
-
-  // Triple the list to ensure the marquee never shows a gap
-  const carouselContent = [...services, ...services, ...services];
-
+export default function ServicesGrid() {
   return (
-    <section className="relative py-24 bg-background-primary overflow-hidden perspective-[1200px]">
-      <div className="container mx-auto px-6 relative z-20 pointer-events-none">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter">
-            Our <span className="text-accent-orange">Expertise</span>
-          </h2>
-          <p className="text-foreground-secondary max-w-xl mx-auto font-light">
-            High-utility solutions tailored for the evolving real estate and technical landscape.
+    <section className="relative w-full py-24 bg-neutral-950 text-white overflow-hidden">
+      
+      {/* Lighting Bleeds */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-600/[0.02] blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-orange-500/[0.02] blur-[160px] rounded-full pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        
+        {/* Core Block Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-xs text-neutral-400 font-mono mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+              Capabilities
+            </div>
+            <h2 className="text-4xl md:text-5xl font-normal tracking-tight text-neutral-100">
+              Our <span className="font-semibold text-orange-500">Expertise</span>
+            </h2>
+          </div>
+          <p className="text-neutral-400 max-w-sm font-light text-sm leading-relaxed">
+            High-utility asset spaces and structural ecosystems tailored for modern enterprise setups.
           </p>
         </div>
-      </div>
 
-      {/* --- Infinite Flowing Carousel --- */}
-      <div 
-        className="relative flex w-full"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
-        <motion.div
-          animate={{
-            x: isPaused ? undefined : ["0%", "-33.33%"],
-          }}
-          transition={{
-            x: {
-              duration: 25,
-              repeat: Infinity,
-              ease: "linear",
-            },
-          }}
-          className="flex gap-6 px-3"
-        >
-          {carouselContent.map((service, idx) => (
+        {/* Expanded 7-Card Balanced Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto perspective-[1500px]">
+          {services.map((service, idx) => (
             <ServiceCard 
-              key={`${idx}-${service.title}`} 
+              key={service.title} 
               service={service} 
-              idx={(idx % services.length)} 
+              idx={idx} 
             />
           ))}
-        </motion.div>
+        </div>
 
-        {/* Gradient Fades for the edges */}
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background-primary to-transparent z-30 pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background-primary to-transparent z-30 pointer-events-none" />
       </div>
-
-      {/* Background Lighting */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[500px] bg-accent-orange/5 blur-[150px] -z-10 rounded-full" />
     </section>
   );
-};
-
-export default PerspectiveGrid;
+}
